@@ -9,7 +9,7 @@ export default class Mailcoach {
     this.apiToken = apiToken;
   }
 
-  async findSubscriber(options: FindSubscriberOptions): Promise<FindSubscriberResponse> {
+  async findSubscriber(options: FindSubscriberOptions): Promise<FindSubscriberResponse | null> {
     const queryParams = `filter[search]=${options.email}`;
     const url = `${this.host}/api/email-lists/${options.emailListId}/subscribers?${queryParams}`;
     const { data } = await this.get(url).then<SubscriberListResponse>((r) => r.json());
