@@ -36,7 +36,7 @@ export default class Mailcoach {
   subscribeToEmailList(options: SubscribeToEmailListOptions) {
     const body = {
       email_list_id: options.emailListId,
-      email: options.emailListId,
+      email: options.email,
       first_name: options.firstName,
       last_name: options.lastName,
       extra_attributes: options.extraAttributes,
