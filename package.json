@@ -1,0 +1,16 @@
+{
+  "name": "mailcoach",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/index.js",
+  "keywords": [
+    "mailcoach"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "typescript": "^4.2.4"
+  }
+}
