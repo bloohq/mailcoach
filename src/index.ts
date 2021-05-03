@@ -1,4 +1,4 @@
-import fetch, { RequestInit } from 'node-fetch';
+import fetch from 'node-fetch';
 export default class Mailcoach {
   private host: string;
   private apiToken: string;
