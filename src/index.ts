@@ -1,4 +1,4 @@
-import nodeFetch, { RequestInit } from "node-fetch";
+import fetch, { RequestInit } from 'node-fetch';
 export default class Mailcoach {
   private host: string;
   private apiToken: string;
@@ -8,35 +8,28 @@ export default class Mailcoach {
     this.apiToken = apiToken;
   }
 
-  async findSubscriber(options: FindSubscriberOptions) {
-    try {
-      const queryParams = `filter[search]=${options.email}`;
-      const url = `${this.host}/api/email-lists/${options.emailListId}/subscribers?${queryParams}`;
-      const { data } = await this.fetch(url).then<SubscriberListResponse>((r) =>
-        r.json()
-      );
-      const subscriber = data.find(
-        (subscriber) => subscriber.email === options.email
-      );
-      return subscriber
-        ? {
-            id: subscriber.id,
-            emailListId: subscriber.email_list_id,
-            email: subscriber.email,
-            firstName: subscriber.first_name,
-            lastName: subscriber.last_name,
-            extraAttributes: subscriber.extra_attributes,
-            tags: subscriber.tags,
-            uuid: subscriber.uuid,
-            subscribedAt: subscriber.subscribed_at,
-            unsubscribedAt: subscriber.unsubscribed_at,
-            createdAt: subscriber.created_at,
-            updatedAt: subscriber.updated_at,
-          }
-        : undefined;
-    } catch (error) {
-      console.error(error);
-    }
+  async findSubscriber(options: FindSubscriberOptions): Promise<FindSubscriberResponse> {
+    const queryParams = `filter[search]=${options.email}`;
+    const url = `${this.host}/api/email-lists/${options.emailListId}/subscribers?${queryParams}`;
+    const { data } = await this.get(url).then<SubscriberListResponse>((r) => r.json());
+    const subscriber = data.find((subscriber) => subscriber.email === options.email);
+
+    if (!subscriber) return null;
+
+    return {
+      id: subscriber.id,
+      emailListId: subscriber.email_list_id,
+      email: subscriber.email,
+      firstName: subscriber.first_name,
+      lastName: subscriber.last_name,
+      extraAttributes: subscriber.extra_attributes,
+      tags: subscriber.tags,
+      uuid: subscriber.uuid,
+      subscribedAt: subscriber.subscribed_at,
+      unsubscribedAt: subscriber.unsubscribed_at,
+      createdAt: subscriber.created_at,
+      updatedAt: subscriber.updated_at,
+    };
   }
 
   subscribeToEmailList(options: SubscribeToEmailListOptions) {
@@ -49,34 +42,29 @@ export default class Mailcoach {
       tags: options.tags,
     };
 
-    try {
-      const url = `${this.host}/api/email-lists/${options.emailListId}/subscribers`;
-      const requestOptions = { method: "POST", body: JSON.stringify(body) };
-      return this.fetch(url, requestOptions).then((r) => r.json());
-    } catch (error) {
-      console.error(error);
-    }
+    const url = `${this.host}/api/email-lists/${options.emailListId}/subscribers`;
+    return this.post(url, body).then((r) => r.json());
   }
 
   unsubscribeFromEmailList(options: UnsubscribeFromEmailListOptions) {
-    try {
-      const url = `${this.host}/api/subscribers/${options.subscriberId}/unsubscribe`;
-      const requestOptions = { method: "POST" };
-      return this.fetch(url, requestOptions).then((r) => r.json());
-    } catch (error) {
-      console.error(error);
-    }
+    const url = `${this.host}/api/subscribers/${options.subscriberId}/unsubscribe`;
+    return this.post(url).then((r) => r.json());
   }
 
-  private fetch(url: string, options?: RequestInit) {
-    return nodeFetch(url, {
-      ...options,
-      headers: {
-        Authorization: `Bearer ${this.apiToken}`,
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-    });
+  private get(url: string) {
+    return fetch(url, { headers: this.getDefaultHeaders() });
+  }
+
+  private post(url: string, body?: Object) {
+    return fetch(url, { method: 'POST', body: JSON.stringify(body), headers: this.getDefaultHeaders() });
+  }
+
+  private getDefaultHeaders() {
+    return {
+      'Authorization': `Bearer ${this.apiToken}`,
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    };
   }
 }
 
@@ -103,13 +91,28 @@ export type FindSubscriberOptions = {
   email: string;
 };
 
+export type FindSubscriberResponse = {
+  id: number;
+  emailListId: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  extraAttributes: any[];
+  tags: string[];
+  uuid: string;
+  subscribedAt: Date;
+  unsubscribedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+// Mailcoach API Interfaces
 export type SubscriberListResponse = {
   data: Subscriber[];
   links: Links;
   meta: Meta;
 };
 
-// Mailcoach API Interfaces
 export type Subscriber = {
   id: number;
   email_list_id: number;
@@ -120,7 +123,7 @@ export type Subscriber = {
   tags: string[];
   uuid: string;
   subscribed_at: Date;
-  unsubscribed_at: null;
+  unsubscribed_at: Date;
   created_at: Date;
   updated_at: Date;
 };
