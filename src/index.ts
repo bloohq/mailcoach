@@ -49,7 +49,7 @@ export default class Mailcoach {
 
   unsubscribeFromEmailList(options: UnsubscribeFromEmailListOptions) {
     const url = `${this.host}/api/subscribers/${options.subscriberId}/unsubscribe`;
-    return this.post(url).then((r) => r.json());
+    return this.post(url);
   }
 
   private get(url: string) {
